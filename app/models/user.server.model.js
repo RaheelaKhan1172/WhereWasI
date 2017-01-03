@@ -1,11 +1,44 @@
 var crypto = require("crypto");
-//require db file
+var db = require("../../config/sql/setup.js");
 
 /***** User Model *****/
 var User = function(email,password) {
-  this.email = email;
-  this.password = password;
-  this.salt;
+  this.email = null;
+  this.password = null;
+  this.hash = null;
+ 
+  this.handleValidation(email,password);
+}
+
+
+
+/** vallidates user information 
+  <param> string email 
+  <param> string password
+  returns @JsonObject containing errors if invalid data || @bool if success
+**/
+
+User.prototype.handleValidation = function( email /* string */, password /*string*/) {
+  var errors = {};
+
+  if (!this.setEmail(email)) {
+    errors.invalidEmail = "Please enter a valid e-mail.";
+  }
+  
+  if (!this.checkIfUnique(email)) {
+    errors.exists = "This e-mail address is already in use.";
+  }
+
+  if (!this.setPassword(password)) {
+    errors.invalidPassword("Password must be 6 or more characers long");
+  }
+  
+  if (errors.hasOwnProperty("invalidPassword") || errors.hasOwnProperty("exists") || errors.hasOwnProperty("invalidEmail")) {
+    return errors;
+  }
+  console.log(this,"this");
+  db.saveUser(this);
+  return true;
 }
 
 
@@ -25,15 +58,12 @@ User.prototype.getEmail = function() {
   returns @bool indicating if succesfully set email 
 **/
 
-User.prototype.setEmail = function(email /* string */ ) {
+User.prototype.validEmail = function(email /* string */ ) {
   var reg = /^[a-zA-Z0-9+_.-]+@[a-zA-Z0-0.-]+$/g;
   var m = email.match(reg);
   if (m) {
-    var exists = this.checkIfUnique(email);
-    if ( !exists ) {
-      this.email = email;
-      return true;
-    }
+    return true;
+  }
   return false //email is incorrect or already exists in db
 }
 
@@ -48,6 +78,12 @@ User.prototype.setEmail = function(email /* string */ ) {
 User.checkIfUnique = function( email /* string */ ) {
   var exists = db.findEmail( email );
   return exists; 
+}
+
+
+
+User.prototype.getPassword = function() {
+  return this.password;
 }
 
 
