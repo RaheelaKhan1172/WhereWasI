@@ -12,10 +12,22 @@ var sqlite3 = require("sqlite3").verbose();
 var db = null;
 
 function initialize() {
-  db =  sqlite3.Database(process.env.FILE);
   db.serialize(function() {
-    db.run( "CREATE TABLE if not EXISTS User ( uid TEXT NOT NULL PRIMARY KEY,email TEXT NOT NULL, password TEXT NOT NULL ) " );
+    db.run( "CREATE TABLE if not EXISTS User ( uid INTEGER PRIMARY KEY AUTOINCREMENT,email TEXT NOT NULL, password TEXT NOT NULL ) " );
   });
+}
+
+exports.connect = function(dbname,callback) {
+  db = sqlite3.Database(dbname,sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
+        function(err) {
+          if (err) callback(err);
+          else callback();
+        }
+      );
+};
+
+exports.disconnect = function(callback) {
+  callback();
 }
 
 /** saves user info in d.b
@@ -29,7 +41,7 @@ exports.saveUser = function(user) {
   } 
   
   var uid = //generate random guid
-  db.run("INSERT INTO User VALUES ( ?, ?, ? )", uid, user.getEmail(),user.getPassword(),function(result) {
+  db.run("INSERT INTO User VALUES (  ?, ? )", user.getEmail(),user.getPassword(),function(result) {
     console.log("the result", result);
     return result;
   });
@@ -56,3 +68,17 @@ exports.findEmail = function(email) {
     return (rows.length) ? true : false;
   }); 
 }
+
+exports.getUserDetails = function( token ) {
+  
+};
+
+exports.deleteUser = function(key,callback) {
+  db.run("DELETE FROM User WHERE UID = ?;",key,function(err) {
+    if (err) { 
+      callback(err);
+    } else {
+      callback();
+    }
+  });
+};

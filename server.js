@@ -1,7 +1,12 @@
 const express = require("./config/express");
 const sqlite3 = require("./config/sql/setup.js");
 
-const db = sqlite3();
+sqlite3.connect(process.env.FILE,function(err) {
+  if (err) {
+    throw err;
+  }
+  console.log("all good");
+});
 
 const app = express();
 app.listen(3030);
