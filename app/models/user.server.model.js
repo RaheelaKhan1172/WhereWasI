@@ -121,5 +121,5 @@ User.prototype.authenticate = function( password /* string */ ) {
   return this.password = this.hashPassword( password );
 }
 
-
+module.exports {User: User}
 

@@ -10,7 +10,7 @@ var fs = require("fs");
 var exists = fs.existsSync(process.env.FILE);
 var sqlite3 = require("sqlite3").verbose();
 var db = null;
-
+console.log(process.env.FILE);
 function initialize() {
   db.serialize(function() {
     db.run( "CREATE TABLE if not EXISTS User ( uid INTEGER PRIMARY KEY AUTOINCREMENT,email TEXT NOT NULL, password TEXT NOT NULL ) " );
@@ -18,7 +18,7 @@ function initialize() {
 }
 
 exports.connect = function(dbname,callback) {
-  db = sqlite3.Database(dbname,sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
+  db = new sqlite3.Database(dbname,sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE,
         function(err) {
           if (err) callback(err);
           else callback();
