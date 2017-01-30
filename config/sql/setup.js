@@ -7,10 +7,9 @@
 
 
 var fs = require("fs");
-var exists = fs.existsSync(process.env.FILE);
+var exists = fs.existsSync(process.env.FILENAME);
 var sqlite3 = require("sqlite3").verbose();
 var db = null;
-console.log(process.env.FILE);
 function initialize() {
   db.serialize(function() {
     db.run( "CREATE TABLE if not EXISTS User ( uid INTEGER PRIMARY KEY AUTOINCREMENT,email TEXT NOT NULL, password TEXT NOT NULL ) " );
@@ -24,6 +23,7 @@ exports.connect = function(dbname,callback) {
           else callback();
         }
       );
+    initialize();
 };
 
 exports.disconnect = function(callback) {
@@ -35,15 +35,15 @@ exports.disconnect = function(callback) {
     returns @GUID || error if unable to save
 **/
 
-exports.saveUser = function(user) {
+exports.saveUser = function(user,cb) {
   if (!db) {
     initialize();
   } 
   
   var uid = //generate random guid
-  db.run("INSERT INTO User VALUES (  ?, ? )", user.getEmail(),user.getPassword(),function(result) {
+  db.run("INSERT INTO User VALUES ( ?, ?, ? )", 1,user.getEmail(),user.getPassword(),function(result) {
     console.log("the result", result);
-    return result;
+    cb(result);
   });
 }
 

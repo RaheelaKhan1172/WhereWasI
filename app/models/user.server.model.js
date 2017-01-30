@@ -6,8 +6,8 @@ var User = function(email,password) {
   this.email = null;
   this.password = null;
   this.hash = null;
+  console.log("WELL");
  
-  this.handleValidation(email,password);
 }
 
 
@@ -18,7 +18,7 @@ var User = function(email,password) {
   returns @JsonObject containing errors if invalid data || @bool if success
 **/
 
-User.prototype.handleValidation = function( email /* string */, password /*string*/) {
+User.prototype.handleValidation = function( email /* string */, password /*string*/, cb) {
   var errors = {};
 
   if (!this.setEmail(email)) {
@@ -28,21 +28,32 @@ User.prototype.handleValidation = function( email /* string */, password /*strin
   if (!this.checkIfUnique(email)) {
     errors.exists = "This e-mail address is already in use.";
   }
-
+  console.log("In Here", email,password);
   if (!this.setPassword(password)) {
-    errors.invalidPassword("Password must be 6 or more characers long");
+    errors.invalidPassword = "Password must be 6 or more characers long";
   }
   
   if (errors.hasOwnProperty("invalidPassword") || errors.hasOwnProperty("exists") || errors.hasOwnProperty("invalidEmail")) {
-    return errors;
+    cb(errors);
+    return;
   }
+
+  this.email = email;
   console.log(this,"this");
-  db.saveUser(this);
-  return true;
+  db.saveUser(this,function(result) {
+    console.log("The result," ,result);
+    cb(result);
+  });
 }
 
 
+User.prototype.setEmail = function(email) {
+  return true;
+};
 
+User.prototype.checkIfUnique = function(email) {
+  return true;
+}
 
 /* returns current user's email */
 
@@ -86,7 +97,9 @@ User.prototype.getPassword = function() {
   return this.password;
 }
 
-
+User.prototype.invalidPassword = function() {
+  return false;
+}
 
 
 /** sets a user model password 
@@ -95,12 +108,14 @@ User.prototype.getPassword = function() {
 **/
 
 User.prototype.setPassword = function(password /* string */) {
+  console.log("hi");
   if (password.length < 6 ) {
     return false;
   }
 
   this.salt = new Buffer(crypto.randomBytes(16).toString("base64"), "base64");
   this.password = this.hashPassword(password);
+  return true;
 }
 
 
@@ -121,5 +136,5 @@ User.prototype.authenticate = function( password /* string */ ) {
   return this.password = this.hashPassword( password );
 }
 
-module.exports {User: User}
+module.exports = {User: User}
 
