@@ -14,20 +14,21 @@ var setup = function(cb) {
       console.log("uh oh",err);
     }
     console.log("lets see");
-    cb(err);
   });
 }
-
-setup(function(err) {
-  console.log("huh");
+beforeEach(function() {
+  setup();
+});
+  
   describe("Testing user save", function() {
     it("Should save without errors if all fields are present",function() {
+      var pass = "password",em = "test@cool.com";
       user = new UserModel({
-        email:"test@test.com",
-        password:"password"
+        email:em,
+        password:pass
       });
       console.log("The user Model");      
-      user.handleValidation(user.email,user.password,function(err) {
+      user.handleValidation(em,pass,function(err) {
         if (err) {
           console.log("error");
         } else {
@@ -37,5 +38,21 @@ setup(function(err) {
     });
 
   });
+  
+  describe("Should get user without error", function() {
+    it ("Should get user info",function() {
+      var id = 1;
+      user.getUserDetails(id, function(err) {
+        should.not.exist(err);
+      });  
+    });
+  });
 
-});
+  describe("Delete user", function() {
+    it("Should delete user without error",function() {
+      var id = 1;
+      user.deleteUser(id, function(err) {
+        should.not.exist(err);
+      });
+    });
+  });

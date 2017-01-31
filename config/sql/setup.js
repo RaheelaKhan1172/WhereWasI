@@ -41,7 +41,7 @@ exports.saveUser = function(user,cb) {
   } 
   
   var uid = //generate random guid
-  db.run("INSERT INTO User VALUES ( ?, ?, ? )", 1,user.getEmail(),user.getPassword(),function(result) {
+  db.run("INSERT INTO User (email,password) VALUES (  ?, ? )", user.getEmail(),user.getPassword(),function(result) {
     console.log("the result", result);
     cb(result);
   });
